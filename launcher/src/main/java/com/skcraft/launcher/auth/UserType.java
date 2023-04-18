@@ -22,7 +22,11 @@ public enum UserType {
     /**
      * Microsoft accounts login via OAuth.
      */
-    MICROSOFT;
+    MICROSOFT,
+    /**
+     * Ely.by accounts login via OAuth.
+     */
+    ELYBY;
 
     /**
      * Return a lowercase version of the enum type.

@@ -25,6 +25,7 @@ public class AccountSelectDialog extends JDialog {
 	private final JButton cancelButton = new JButton(SharedLocale.tr("button.cancel"));
 	private final JButton addMojangButton = new JButton(SharedLocale.tr("accounts.addMojang"));
 	private final JButton addMicrosoftButton = new JButton(SharedLocale.tr("accounts.addMicrosoft"));
+	private final JButton addElyByButton = new JButton(SharedLocale.tr("accounts.addElyBy"));
 	private final JButton removeSelected = new JButton(SharedLocale.tr("accounts.removeSelected"));
 	private final JButton offlineButton = new JButton(SharedLocale.tr("login.playOffline"));
 	private final LinedBoxPanel buttonsPanel = new LinedBoxPanel(true);
@@ -76,10 +77,18 @@ public class AccountSelectDialog extends JDialog {
 		addMojangButton.setAlignmentX(CENTER_ALIGNMENT);
 		addMicrosoftButton.setAlignmentX(CENTER_ALIGNMENT);
 		removeSelected.setAlignmentX(CENTER_ALIGNMENT);
+		addElyByButton.setAlignmentX(CENTER_ALIGNMENT);
 		loginButtonsRow.add(addMojangButton, BorderLayout.NORTH);
 		loginButtonsRow.add(addMicrosoftButton, BorderLayout.CENTER);
-		loginButtonsRow.add(removeSelected, BorderLayout.SOUTH);
+
 		loginButtonsRow.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+
+		JPanel loginButtonsRow2 = new JPanel(new BorderLayout(0, 5));
+		loginButtonsRow2.add(addElyByButton, BorderLayout.NORTH);
+		loginButtonsRow2.add(Box.createVerticalStrut(10), BorderLayout.CENTER);
+		loginButtonsRow2.add(removeSelected, BorderLayout.SOUTH);
+
+		loginButtonsRow.add(loginButtonsRow2, BorderLayout.SOUTH);
 
 		JPanel listAndLoginContainer = new JPanel();
 		listAndLoginContainer.add(accountPane, BorderLayout.WEST);
@@ -103,6 +112,7 @@ public class AccountSelectDialog extends JDialog {
 		});
 
 		addMicrosoftButton.addActionListener(ev -> attemptMicrosoftLogin());
+		addElyByButton.addActionListener(ev -> attemptElyByLogin());
 
 		offlineButton.addActionListener(ev ->
 				setResult(new OfflineSession(launcher.getProperties().getProperty("offlinePlayerName"))));
@@ -151,6 +161,27 @@ public class AccountSelectDialog extends JDialog {
 
 		ListenableFuture<?> future = launcher.getExecutor().submit(() -> {
 			Session newSession = launcher.getMicrosoftLogin().login(() ->
+					progress.set(SharedLocale.tr("login.loggingInStatus"), -1));
+
+			if (newSession != null) {
+				launcher.getAccounts().update(newSession.toSavedSession());
+				setResult(newSession);
+			}
+
+			return null;
+		});
+
+		ProgressDialog.showProgress(this, future, progress,
+				SharedLocale.tr("login.loggingInTitle"), status);
+		SwingHelper.addErrorDialogCallback(this, future);
+	}
+
+	private void attemptElyByLogin() {
+		String status = SharedLocale.tr("login.elyby.seeBrowser");
+		SettableProgress progress = new SettableProgress(status, -1);
+
+		ListenableFuture<?> future = launcher.getExecutor().submit(() -> {
+			Session newSession = launcher.getElyByLogin().login(() ->
 					progress.set(SharedLocale.tr("login.loggingInStatus"), -1));
 
 			if (newSession != null) {

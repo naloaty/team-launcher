@@ -172,11 +172,26 @@ public final class Launcher {
         return new MicrosoftLoginService(getProperties().getProperty("microsoftClientId"));
     }
 
+    /**
+     * Get the Ely.by login service.
+     *
+     * @return the Ely.by login service
+     */
+    public ElyByLoginService getElyByLogin() {
+        return new ElyByLoginService(getProperties().getProperty("elyByClientId"));
+    }
+
     public LoginService getLoginService(UserType type) {
-        if (type == UserType.MICROSOFT) {
-            return getMicrosoftLogin();
-        } else {
-            return getYggdrasil();
+
+        switch (type) {
+            case ELYBY:
+                return getElyByLogin();
+
+            case MICROSOFT:
+                return getMicrosoftLogin();
+
+            default:
+                return getYggdrasil();
         }
     }
 
